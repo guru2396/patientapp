@@ -1,5 +1,6 @@
 package com.patient.patientapp.controller;
 
+import com.patient.patientapp.entity.Consent_request;
 import com.patient.patientapp.service.PatientAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
