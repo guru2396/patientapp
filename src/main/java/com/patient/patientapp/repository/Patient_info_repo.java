@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface Patient_info_repo extends JpaRepository<Patient_info,String> {
 
-    @Query(value = "SELECT * FROM patient_info",nativeQuery = true)
-    public List<Patient_info> all();
+    @Query(value = "SELECT * FROM patient_info WHERE patient_id=?1",nativeQuery = true)
+    Patient_info getPatientById(String id);
 }
