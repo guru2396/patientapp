@@ -2,6 +2,7 @@ package com.patient.patientapp.controller;
 
 import com.patient.patientapp.dto.ConsentNotificationResponse;
 import com.patient.patientapp.dto.CreateConsentRequest;
+import com.patient.patientapp.dto.GetEhrResponse;
 import com.patient.patientapp.entity.Consent_request;
 import com.patient.patientapp.service.JwtService;
 import com.patient.patientapp.service.PatientAppService;
@@ -39,6 +40,15 @@ public class PatientAppController {
         String consentId=patientAppService.createConsent(createConsentRequest,patientId);
         return ResponseEntity.ok(consentId);
     }
+
+    @GetMapping(value = "/get-ehr")
+    public ResponseEntity<?> getEhr(@RequestHeader("Authorization") String token){
+        String patientId=token ;//jwtService.extractID(token);
+        GetEhrResponse getEhrResponse= patientAppService.fetchEhrOfPatient(patientId);
+        return ResponseEntity.ok(getEhrResponse);
+    }
+
+
 
 
 
