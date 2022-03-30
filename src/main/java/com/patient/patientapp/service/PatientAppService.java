@@ -14,6 +14,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -46,6 +48,9 @@ public class PatientAppService {
     @Autowired
     private Ehr_info_repo ehr_info_repo;
 
+    @Autowired
+    private JwtService jwtService;
+
     @Value("${consentManager.url}")
     private String consentManagerBaseUrl;
 
@@ -58,6 +63,63 @@ public class PatientAppService {
     private String consentToken;
 
     private Map<String,String> tokenMap=new HashMap<>();
+
+    private PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
+
+    public String registerPatient(PatientRegistrationDto patientRegistrationDto){
+        Patient_info patient=patient_info_repo.getPatientByEmail(patientRegistrationDto.getPatient_email());
+        if(patient==null){
+            Patient_info patient_info=new Patient_info();
+            patient_info.setPatient_name(patientRegistrationDto.getPatient_name());
+            patient_info.setPatient_contact(patientRegistrationDto.getPatient_contact());
+            long id=generateID();
+            String patientId="PAT_" + id;
+            patient_info.setPatient_id(patientId); // String id="PAT_"+UUID.randomUUID().toString();
+
+            patient_info.setPatient_email(patientRegistrationDto.getPatient_email());
+            patient_info.setPatient_dob(patientRegistrationDto.getPatient_dob());
+            patient_info.setPatient_address(patientRegistrationDto.getPatient_address());
+            patient_info.setPatient_gender(patientRegistrationDto.getPatient_gender());
+            patient_info.setPatient_emergency_contact(patientRegistrationDto.getPatient_emergency_contact());
+            patient_info.setPatient_emergency_contact_name(patientRegistrationDto.getPatient_emergency_contact_name());
+            patient_info.setPatient_govtid_type(patientRegistrationDto.getPatient_govtid_type());
+            patient_info.setPatient_govtid(patientRegistrationDto.getPatient_govtid());
+
+            String hash_password = passwordEncoder.encode(patientRegistrationDto.getPatient_password());
+            patient_info.setPatient_password(hash_password); //saving hashed password in database;
+
+            //patient_info.setPatient_password(patientRegistrationDto.getPatient_password());
+
+            //boolean matched = passwordEncoder.matches(plaintextpassword in string, hashedpassword from database);
+            try{
+                patient_info_repo.save(patient_info);
+            }catch(Exception e){
+                return null;
+            }
+            return patient_info.getPatient_id(); //returns this id to PatientAppController
+        }
+        else{
+            return null;
+        }
+
+    }
+
+    public String loginPatient(AuthRequest authRequest){
+        Patient_info patient_info=patient_info_repo.getPatientByEmail(authRequest.getUsername());
+        if(patient_info!=null){
+            boolean isMatch=passwordEncoder.matches(authRequest.getPassword(),patient_info.getPatient_password());
+            if(isMatch){
+                String token=jwtService.createToken(patient_info.getPatient_id());
+                return token;
+            }
+            else{
+                return null;
+            }
+        }
+        else{
+            return null;
+        }
+    }
 
     public List<ConsentNotificationResponse> getConsentRequests(String patientId){
         List<Consent_request> consentReqList=consent_request_repo.getConsentRequestsForPatient(patientId);
@@ -188,6 +250,11 @@ public class PatientAppService {
         ResponseEntity<String> response=restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         String token=response.getBody();
         return token;
+    }
+
+    public long generateID(){
+        long id=(long) Math.floor(Math.random()*9_000_000_000L)+1_000_000_000L;
+        return id;
     }
 
 

@@ -1,8 +1,6 @@
 package com.patient.patientapp.controller;
 
-import com.patient.patientapp.dto.ConsentNotificationResponse;
-import com.patient.patientapp.dto.CreateConsentRequest;
-import com.patient.patientapp.dto.GetEhrResponse;
+import com.patient.patientapp.dto.*;
 import com.patient.patientapp.entity.Consent_request;
 import com.patient.patientapp.service.JwtService;
 import com.patient.patientapp.service.PatientAppService;
@@ -23,8 +21,16 @@ public class PatientAppController {
     private JwtService jwtService;
 
     @PostMapping(value="/register-patient")
-    public ResponseEntity<?> register( ){
-        return null;
+    public ResponseEntity<?> register(@RequestBody PatientRegistrationDto patientRegistrationDto){
+        String id=patientAppService.registerPatient(patientRegistrationDto);
+
+        return ResponseEntity.ok(id);
+    }
+
+    @PostMapping(value = "/login-patient")
+    public ResponseEntity<?> loginPatient(@RequestBody AuthRequest authRequest){
+        String msg= patientAppService.loginPatient(authRequest);
+        return ResponseEntity.ok(msg);
     }
 
 
