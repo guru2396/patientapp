@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class ConsentNotificationResponse {
 
-    private String consent_id;
+    private String consent_request_id;
 
     private String doctor_name;
 

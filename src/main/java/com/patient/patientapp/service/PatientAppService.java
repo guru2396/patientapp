@@ -65,7 +65,7 @@ public class PatientAppService {
         if(consentReqList!=null){
             for(Consent_request consent_request:consentReqList){
                 ConsentNotificationResponse consentNotificationResponse=new ConsentNotificationResponse();
-                consentNotificationResponse.setConsent_id(consent_request.getConsent_request_id());
+                consentNotificationResponse.setConsent_request_id(consent_request.getConsent_request_id());
                 Doctor_info doctor =doctor_info_repo.getDoctorById(consent_request.getDoctor_id());
                 Hospital_info hospital=hospital_info_repo.getHospitalById(consent_request.getHospital_id());
                 consentNotificationResponse.setAccess_purpose(consent_request.getAccess_purpose());
@@ -122,6 +122,8 @@ public class PatientAppService {
         if(responseEntity.getStatusCode().is5xxServerError()){
             return null;
         }
+        consent_request.setRequest_status("Completed");
+        consent_request_repo.save(consent_request);
         return responseEntity.getBody();
 
     }
@@ -152,6 +154,7 @@ public class PatientAppService {
                 GetEhrHospitalRecords getEhrHospitalRecords=new GetEhrHospitalRecords();
                 String hospitalName=hospital_info_repo.getHospitalById(hospitalId).getHospital_name();
                 getEhrHospitalRecords.setHospitalName(hospitalName);
+                getEhrHospitalRecords.setHospitalId(hospitalId);
                 getEhrHospitalRecords.setEpisodes(response.getBody());
                 hospitalRecords.add(getEhrHospitalRecords);
             }

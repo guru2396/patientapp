@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = {"*"})
 public class PatientAppController {
 
     @Autowired
@@ -29,8 +30,9 @@ public class PatientAppController {
 
     @GetMapping(value="/get-consent-notifications")
     public ResponseEntity<?> getConsentRequests(@RequestHeader("Authorization") String token){
-        String patientId=jwtService.extractID(token);
-        List<ConsentNotificationResponse> consentrequests= patientAppService.getConsentRequests(patientId);
+        //String patientId=jwtService.extractID(token);
+        System.out.print(token);
+        List<ConsentNotificationResponse> consentrequests= patientAppService.getConsentRequests(token);
         return ResponseEntity.ok(consentrequests);
     }
 

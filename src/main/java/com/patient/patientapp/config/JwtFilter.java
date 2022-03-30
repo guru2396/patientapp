@@ -1,6 +1,6 @@
 package com.patient.patientapp.config;
 
-/*
+
 import com.patient.patientapp.entity.Patient_info;
 import com.patient.patientapp.service.JwtService;
 import com.patient.patientapp.service.PatientAppService;
@@ -48,4 +48,3 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request,response);
     }
 }
- */
