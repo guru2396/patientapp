@@ -13,7 +13,7 @@ public class CreateConsentRequest {
 
     private String ehr_id;
 
-    private List<EpisodeDetails> episodes;
+    private List<SelectedRecords> selectedRecords;
 
     private String purpose;
 

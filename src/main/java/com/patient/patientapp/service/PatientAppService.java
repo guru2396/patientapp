@@ -168,7 +168,9 @@ public class PatientAppService {
         createConsent.setDelegateAccess(createConsentRequest.getDelegateAccess());
         createConsent.setPurpose(createConsentRequest.getPurpose());
         createConsent.setSignature(createConsentRequest.getSignature());
-        createConsent.setEpisodes(createConsentRequest.getEpisodes());
+        List<EpisodeDetails> episodes=formCreateConsentRequest(createConsentRequest.getSelectedRecords());
+        createConsent.setEpisodes(episodes);
+       // createConsent.setEpisodes(createConsentRequest.getEpisodes());
         createConsent.setEhr_id(createConsentRequest.getEhr_id());
         String token=getConsentToken();
         token="Bearer " + token;
@@ -188,6 +190,31 @@ public class PatientAppService {
         consent_request_repo.save(consent_request);
         return responseEntity.getBody();
 
+    }
+
+    private List<EpisodeDetails> formCreateConsentRequest(List<SelectedRecords> selectedRecords){
+        List<EpisodeDetails> episodes=new ArrayList<>();
+        Map<String,List<String>> map=new HashMap<>();
+        for(SelectedRecords selectedRecord:selectedRecords){
+            List<String> l=map.getOrDefault(selectedRecord.getEpisodeId(),new ArrayList<>());
+            l.add(selectedRecord.getEncounterId());
+            map.put(selectedRecord.getEpisodeId(),l);
+        }
+        for(String episodeId:map.keySet()){
+            EpisodeDetails episodeDetails=new EpisodeDetails();
+            episodeDetails.setEpisodeId(episodeId);
+            List<String> encounterIdList=map.get(episodeId);
+            List<EncounterDetails> encounterDetails=new ArrayList<>();
+            for(String encounterId:encounterIdList){
+                EncounterDetails encounter=new EncounterDetails();
+                encounter.setEncounterId(encounterId);
+                encounterDetails.add(encounter);
+            }
+            episodeDetails.setEncounterDetails(encounterDetails);
+            episodeDetails.setTime_limit_records("");
+            episodes.add(episodeDetails);
+        }
+        return episodes;
     }
 
     public GetEhrResponse fetchEhrOfPatient(String patientId){
