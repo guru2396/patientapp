@@ -1,7 +1,7 @@
 package com.patient.patientapp.config;
 
 
-import com.patient.patientapp.entity.Patient_info;
+import com.patient.patientapp.entity.Patient_login_info;
 import com.patient.patientapp.service.JwtService;
 import com.patient.patientapp.service.PatientAppService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String subject=jwtService.extractID(auth);
             if(subject!=null && SecurityContextHolder.getContext().getAuthentication()==null){
                 if(subject.startsWith("PAT_")){
-                    Patient_info patient=patientAppService.getPatientById(subject);
+                    Patient_login_info patient=patientAppService.getPatientById(subject);
                     if(patient!=null){
                         UsernamePasswordAuthenticationToken ut=new UsernamePasswordAuthenticationToken(patient,null,null);
                         ut.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

@@ -1,18 +1,12 @@
-package com.patient.patientapp.entity;
+package com.patient.patientapp.dto;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Date;
 
-@Entity
-@Table(name="consent_request")
 @Data
-public class Consent_request {
+public class ConsentRequestDto {
 
-    @Id
     private String consent_request_id;
 
     private String patient_id;
@@ -28,5 +22,4 @@ public class Consent_request {
     private String request_status;
 
     private Date created_dt;
-
 }

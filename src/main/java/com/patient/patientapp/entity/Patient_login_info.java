@@ -7,16 +7,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="patient_hospital_mapping")
+@Table(name="patient_login_info")
 @Data
-public class Patient_Hospital_mapping {
+public class Patient_login_info {
 
     @Id
-    private String mapping_id;
-
     private String patient_id;
 
-    private String hospital_id;
+    private String patient_name;
 
+    private String patient_email;
 
+    private String patient_password;
 }
