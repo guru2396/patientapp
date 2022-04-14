@@ -372,6 +372,29 @@ public class PatientAppService {
         return token;
     }
 
+    public List<AccessLogsDto> fetchAccessLogs(String patientId){
+        List<String> hospitals=fetchHospitalsForPatient(patientId);
+        List<AccessLogsDto> accessLogsDtoList=new ArrayList<>();
+        for (String hospital: hospitals) {
+            RestTemplate restTemplate=new RestTemplate();
+            String token=getCentralServerToken();
+            token="Bearer " + token;
+            List<String> l=new ArrayList<>();
+            l.add(token);
+            HttpHeaders headers=new HttpHeaders();
+            headers.put("Authorization",l);
+            HttpEntity<?> httpEntity=new HttpEntity<>(headers);
+            String envURL=environment.getProperty(hospital+".accessLog.url");
+            envURL=envURL +"/" +patientId;
+            //String finalurl=url + "/dummyAPI/" + patientId;
+            ResponseEntity<List<AccessLogsDto>> response=restTemplate.exchange(envURL, HttpMethod.GET, httpEntity, new ParameterizedTypeReference<List<AccessLogsDto>>() {
+            });
+            accessLogsDtoList.addAll(response.getBody());
+        }
+
+        return accessLogsDtoList;
+    }
+
     public long generateID(){
         long id=(long) Math.floor(Math.random()*9_000_000_000L)+1_000_000_000L;
         return id;

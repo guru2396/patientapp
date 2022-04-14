@@ -63,7 +63,14 @@ public class PatientAppController {
     }
 
 
-
+    @GetMapping(value = "/get-access-logs")
+    public ResponseEntity<?> getAccessLogs(@RequestHeader("Authorization") String token){
+        String patientId=jwtService.extractID(token);
+        List<AccessLogsDto> accessLogsDtoList= patientAppService.fetchAccessLogs(patientId);
+        //System.out.println(getEhrResponse.getEhrId());
+        //System.out.println(getEhrResponse.getHospitalRecords().get(0).getEpisodes().get(0).getEpisodeName());
+        return ResponseEntity.ok(accessLogsDtoList);
+    }
 
 
 
