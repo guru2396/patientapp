@@ -98,7 +98,20 @@ public class PatientAppController {
         return ResponseEntity.ok(status);
     }
 
+    @PostMapping(value ="/add-nominee")
+    public ResponseEntity<?> addNominee(@RequestBody AddNomineeDto addNomineeDto,@RequestHeader("Authorization") String token){
+        String patientId=jwtService.extractID(token);
+        String status=patientAppService.addNominee(addNomineeDto,patientId);
+        return ResponseEntity.ok(status);
+    }
 
-
-
+    @PostMapping(value = "/login-nominee")
+    public ResponseEntity<?> loginNominee(@RequestBody AuthRequest authRequest){
+        String msg= patientAppService.loginNominee(authRequest);
+        if(msg==null){
+            ResponseEntity<String> response=new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
+            return response;
+        }
+        return ResponseEntity.ok(msg);
+    }
 }
