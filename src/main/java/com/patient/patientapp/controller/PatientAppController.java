@@ -72,6 +72,32 @@ public class PatientAppController {
         return ResponseEntity.ok(accessLogsDtoList);
     }
 
+    @PostMapping(value="/send-otp/{patientId}")
+    public ResponseEntity<?> sendOtp(@PathVariable("patientId") String patientId){
+        String status=patientAppService.sendOtp(patientId);
+        return ResponseEntity.ok(status);
+    }
+
+    @PostMapping(value="/validate-otp/{patientId}/{otp}")
+    public ResponseEntity<?> validateOtp(@PathVariable("patientId") String patientId,@PathVariable("otp") String otp){
+        String status=patientAppService.validateOtp(patientId,otp);
+        return ResponseEntity.ok(status);
+    }
+
+    @GetMapping(value = "/retrieve-consents")
+    public ResponseEntity<?> retrieveConsents(@RequestHeader("Authorization") String token){
+        String patientId=jwtService.extractID(token);
+        List<ConsentUIDto> consentUIDtoList= patientAppService.retrieveConsents(patientId);
+        return ResponseEntity.ok(consentUIDtoList);
+    }
+
+
+    @PostMapping(value="/revoke-consent/{consentId}")
+    public ResponseEntity<?> revokeConsent(@PathVariable("consentId") String consentId){
+        String status= patientAppService.revokeConsent(consentId);
+        return ResponseEntity.ok(status);
+    }
+
 
 
 

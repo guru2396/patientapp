@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface Patient_login_info_repo extends JpaRepository<Patient_login_info,String> {
 
-    @Query(value="SELECT * FROM patient_login_info WHERE patient_email=?1",nativeQuery = true)
+    @Query(value="SELECT * FROM patient_login_info WHERE patient_email=?1 and is_verified='Y'",nativeQuery = true)
     Patient_login_info getLoginInfoByEmail(String email);
 
     @Query(value="SELECT * FROM patient_login_info WHERE patient_id=?1",nativeQuery = true)

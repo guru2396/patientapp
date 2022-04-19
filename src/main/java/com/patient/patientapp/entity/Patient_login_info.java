@@ -19,4 +19,6 @@ public class Patient_login_info {
     private String patient_email;
 
     private String patient_password;
+
+    private String is_verified;
 }

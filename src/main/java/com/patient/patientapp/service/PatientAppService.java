@@ -52,6 +52,12 @@ public class PatientAppService {
     @Value("${centraldbserver.clientSecret}")
     private String centraldbServerClientSecret;
 
+    @Autowired
+    private OtpService otpService;
+
+    @Autowired
+    private EmailService emailService;
+
     private String consentToken;
 
     private String centralServerToken;
@@ -86,6 +92,7 @@ public class PatientAppService {
                 patient_login_info.setPatient_email(patientRegistrationDto.getPatient_email());
                 patient_login_info.setPatient_password(hash_password);
                 patient_login_info.setPatient_name(patientRegistrationDto.getPatient_name());
+                patient_login_info.setIs_verified("N");
                 patient_login_info_repo.save(patient_login_info);
                 return response.getBody();
             }
@@ -317,6 +324,20 @@ public class PatientAppService {
         return response.getBody();
     }
 
+    private DoctorDto fetchDoctorById(String id){
+        RestTemplate restTemplate=new RestTemplate();
+        String token=getCentralServerToken();
+        List<String> l=new ArrayList<>();
+        token="Bearer " + token;
+        l.add(token);
+        HttpHeaders headers=new HttpHeaders();
+        headers.put("Authorization",l);
+        HttpEntity<?> httpEntity=new HttpEntity<>(headers);
+        String url=centraldbServerUrl + "/get-doctor/" + id;
+        ResponseEntity<DoctorDto> response=restTemplate.exchange(url,HttpMethod.GET,httpEntity,DoctorDto.class);
+        return response.getBody();
+    }
+
     private String fetchEhrIdByPatientId(String id){
         RestTemplate restTemplate=new RestTemplate();
         String token=getCentralServerToken();
@@ -377,7 +398,10 @@ public class PatientAppService {
         List<AccessLogsDto> accessLogsDtoList=new ArrayList<>();
         for (String hospital: hospitals) {
             RestTemplate restTemplate=new RestTemplate();
-            String token=getCentralServerToken();
+            String tokenKey=hospital + ".authenticate.url";
+            String tokenUrl=environment.getProperty(tokenKey);
+            String secret=environment.getProperty(hospital + ".secret");
+            String token=fetchHospitalToken(tokenUrl,patientId,secret);
             token="Bearer " + token;
             List<String> l=new ArrayList<>();
             l.add(token);
@@ -393,6 +417,76 @@ public class PatientAppService {
         }
 
         return accessLogsDtoList;
+    }
+
+    public String sendOtp(String patientId){
+        Patient_login_info patient_login_info=getPatientById(patientId);
+        if(patient_login_info!=null){
+            int otp= otpService.generateOTP(patientId);
+            emailService.sendEmail(patient_login_info.getPatient_email(),String.valueOf(otp));
+            return "Success";
+        }
+        return null;
+    }
+
+    public String validateOtp(String patientId,String otp){
+        int storedOtp= otpService.getOtp(patientId);
+        if(storedOtp!=0){
+            int intOtp=Integer.parseInt(otp);
+            if(storedOtp==intOtp) {
+                Patient_login_info patient_login_info = getPatientById(patientId);
+                patient_login_info.setIs_verified("Y");
+                patient_login_info_repo.save(patient_login_info);
+                return "Success";
+            }
+        }
+        return null;
+    }
+
+    public List<ConsentUIDto> retrieveConsents(String patientId){
+        String token=getConsentToken();
+        token="Bearer " + token;
+        HttpHeaders httpHeaders=new HttpHeaders();
+        List<String> l=new ArrayList<>();
+        l.add(token);
+        httpHeaders.put("Authorization",l);
+        HttpEntity<?> httpEntity=new HttpEntity<>(httpHeaders);
+        String url=consentManagerBaseUrl + "/retrieve-consents/" + patientId;
+        RestTemplate restTemplate=new RestTemplate();
+        ResponseEntity<List<ConsentDto>> response=restTemplate.exchange(url, HttpMethod.GET, httpEntity, new ParameterizedTypeReference<List<ConsentDto>>() {
+        });
+        List<ConsentUIDto> consentUIDtoList=new ArrayList<>();
+        List<ConsentDto> consentDtoList=response.getBody();
+        if(consentDtoList!=null){
+            for(ConsentDto consentDto:consentDtoList){
+                ConsentUIDto consentUIDto=new ConsentUIDto();
+                consentUIDto.setConsent_id(consentDto.getConsent_id());
+                consentUIDto.setAccess_purpose(consentDto.getAccess_purpose());
+                consentUIDto.setDelegate_access(consentDto.getDelegate_access());
+                consentUIDto.setCreation_date(consentDto.getCreation_date());
+                consentUIDto.setValidity(consentDto.getValidity());
+                HospitalDto hospitalDto=fetchHospitalById(consentDto.getDataCustodianId());
+                consentUIDto.setHospital_name(hospitalDto.getHospital_name());
+                DoctorDto doctorDto=fetchDoctorById(consentDto.getDoctor_id());
+                consentUIDto.setDoctor_name(doctorDto.getDoctor_name());
+                consentUIDtoList.add(consentUIDto);
+            }
+        }
+        return consentUIDtoList;
+    }
+
+    public String revokeConsent(String consentId){
+        String token=getConsentToken();
+        token="Bearer " + token;
+        HttpHeaders httpHeaders=new HttpHeaders();
+        List<String> l=new ArrayList<>();
+        l.add(token);
+        httpHeaders.put("Authorization",l);
+        HttpEntity<?> httpEntity=new HttpEntity<>(httpHeaders);
+        String url=consentManagerBaseUrl + "/revoke-consent/" + consentId;
+        RestTemplate restTemplate=new RestTemplate();
+        ResponseEntity<String> response=restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+        return "Success";
     }
 
     public long generateID(){
