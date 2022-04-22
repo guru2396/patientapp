@@ -11,4 +11,7 @@ public interface Add_Nominee_repo extends JpaRepository<Nominee_info,String> {
     @Query(value="SELECT * FROM nominee_info WHERE nominee_email=?1",nativeQuery = true)
     Nominee_info getNomineeByEmail(String email);
 
+    @Query(value = "SELECT * FROM nominee_info WHERE nominee_id=?1",nativeQuery = true)
+    Nominee_info getNomineeById(String id);
+
 }

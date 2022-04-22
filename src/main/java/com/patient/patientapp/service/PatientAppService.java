@@ -15,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import sun.tools.tree.AddExpression;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -489,7 +488,7 @@ public class PatientAppService {
         HttpEntity<?> httpEntity=new HttpEntity<>(httpHeaders);
         String url=consentManagerBaseUrl + "/revoke-consent/" + consentId;
         RestTemplate restTemplate=new RestTemplate();
-        ResponseEntity<String> response=restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+        ResponseEntity<String> response=restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
         return "Success";
     }
 
@@ -498,46 +497,5 @@ public class PatientAppService {
         return id;
     }
 
-
-
-    public String addNominee(AddNomineeDto addNomineeDto,String patientId){
-        Nominee_info nominee=add_nominee_repo.getNomineeByEmail(addNomineeDto.getNominee_email());
-        if(nominee==null){
-            Nominee_info nominee_info = new Nominee_info();
-            nominee_info.setNominee_name(addNomineeDto.getNominee_name());
-            nominee_info.setNominee_email(addNomineeDto.getNominee_email());
-            nominee_info.setNominee_contact(addNomineeDto.getNominee_contact());
-            nominee_info.setPatient_id((patientId));
-            nominee_info.setNominee_code((String.valueOf(generateID())));
-            nominee_info.setIs_deleted("N");
-            long id=generateID();
-            String nomineeId="NOM_"+id;
-            nominee_info.setNominee_id(nomineeId);
-            add_nominee_repo.save(nominee_info);
-
-            return "Nominee added successfully";
-        }
-        else{
-            return null;
-        }
-
-    }
-
-    public String loginNominee(AuthRequest authRequest){
-        Nominee_info nominee_info=add_nominee_repo.getNomineeByEmail(authRequest.getUsername());
-        if(nominee_info!=null){
-            boolean isMatch=authRequest.getPassword().equals(nominee_info.getNominee_code());
-            if(isMatch){
-                String token=jwtService.createToken(nominee_info.getNominee_id());
-                return token;
-            }
-            else{
-                return null;
-            }
-        }
-        else{
-            return null;
-        }
-    }
 
 }
