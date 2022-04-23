@@ -97,6 +97,7 @@ public class PatientAppService {
                 patient_login_info.setPatient_name(patientRegistrationDto.getPatient_name());
                 patient_login_info.setIs_verified("N");
                 patient_login_info_repo.save(patient_login_info);
+                sendOtp(response.getBody());
                 return response.getBody();
             }
             /*try{
@@ -197,12 +198,12 @@ public class PatientAppService {
         createConsent.setPatient_id(patientId);
         ConsentRequestDto consent_request=getConsentRequestById(createConsentRequest.getConsent_request_id());
         createConsent.setDoctor_id(consent_request.getDoctor_id());
-        createConsent.setDataCustodianId(createConsentRequest.getDataCustodianId());
+        //createConsent.setDataCustodianId(createConsentRequest.getDataCustodianId());
         createConsent.setDelegateAccess(createConsentRequest.getDelegateAccess());
         createConsent.setPurpose(createConsentRequest.getPurpose());
         createConsent.setSignature(createConsentRequest.getSignature());
-        List<EpisodeDetails> episodes=formCreateConsentRequest(createConsentRequest.getSelectedRecords());
-        createConsent.setEpisodes(episodes);
+        List<DataCustodian> dataCustodians=formCreateConsentRequest(createConsentRequest.getSelectedRecords());
+        createConsent.setDataCustodians(dataCustodians);
        // createConsent.setEpisodes(createConsentRequest.getEpisodes());
         createConsent.setEhr_id(createConsentRequest.getEhr_id());
         String token=getConsentToken();
@@ -252,29 +253,44 @@ public class PatientAppService {
         ResponseEntity<String> response=restTemplate.exchange(url,HttpMethod.POST,httpEntity,String.class);
     }
 
-    private List<EpisodeDetails> formCreateConsentRequest(List<SelectedRecords> selectedRecords){
-        List<EpisodeDetails> episodes=new ArrayList<>();
-        Map<String,List<String>> map=new HashMap<>();
-        for(SelectedRecords selectedRecord:selectedRecords){
-            List<String> l=map.getOrDefault(selectedRecord.getEpisodeId(),new ArrayList<>());
-            l.add(selectedRecord.getEncounterId());
-            map.put(selectedRecord.getEpisodeId(),l);
+    private List<DataCustodian> formCreateConsentRequest(List<SelectedRecords> selectedRecords){
+        List<DataCustodian> dataCustodians=new ArrayList<>();
+        Map<String,List<SelectedRecords>> map=new HashMap<>();
+        for(SelectedRecords record:selectedRecords){
+            List<SelectedRecords> list=map.getOrDefault(record.getHospitalId(),new ArrayList<>());
+            list.add(record);
+            map.put(record.getHospitalId(),list);
         }
-        for(String episodeId:map.keySet()){
-            EpisodeDetails episodeDetails=new EpisodeDetails();
-            episodeDetails.setEpisodeId(episodeId);
-            List<String> encounterIdList=map.get(episodeId);
-            List<EncounterDetails> encounterDetails=new ArrayList<>();
-            for(String encounterId:encounterIdList){
-                EncounterDetails encounter=new EncounterDetails();
-                encounter.setEncounterId(encounterId);
-                encounterDetails.add(encounter);
+        for(String hospitalId:map.keySet()){
+            DataCustodian dataCustodian=new DataCustodian();
+            dataCustodian.setDataCustodianId(hospitalId);
+            Map<String,List<String>> episodeMap=new HashMap<>();
+            List<SelectedRecords> recordsList=map.get(hospitalId);
+            for(SelectedRecords record:recordsList){
+                List<String> list=episodeMap.getOrDefault(record.getEpisodeId(),new ArrayList<>());
+                list.add(record.getEncounterId());
+                episodeMap.put(record.getEpisodeId(),list);
             }
-            episodeDetails.setEncounterDetails(encounterDetails);
-            episodeDetails.setTime_limit_records("");
-            episodes.add(episodeDetails);
+            List<EpisodeDetails> episodeDetails=new ArrayList<>();
+            for(String episodeId: episodeMap.keySet()){
+                EpisodeDetails details=new EpisodeDetails();
+                details.setEpisodeId(episodeId);
+                details.setTime_limit_records("");
+                List<String> list=episodeMap.get(episodeId);
+                List<EncounterDetails> encounterDetailsList=new ArrayList<>();
+                for(String encounterId:list){
+                    EncounterDetails encounterDetails=new EncounterDetails();
+                    encounterDetails.setEncounterId(encounterId);
+                    encounterDetailsList.add(encounterDetails);
+                }
+                details.setEncounterDetails(encounterDetailsList);
+                episodeDetails.add(details);
+            }
+            dataCustodian.setEpisodes(episodeDetails);
+            dataCustodians.add(dataCustodian);
         }
-        return episodes;
+
+        return dataCustodians;
     }
 
     public GetEhrResponse fetchEhrOfPatient(String patientId){
@@ -468,8 +484,8 @@ public class PatientAppService {
                 consentUIDto.setDelegate_access(consentDto.getDelegate_access());
                 consentUIDto.setCreation_date(consentDto.getCreation_date());
                 consentUIDto.setValidity(consentDto.getValidity());
-                HospitalDto hospitalDto=fetchHospitalById(consentDto.getDataCustodianId());
-                consentUIDto.setHospital_name(hospitalDto.getHospital_name());
+                //HospitalDto hospitalDto=fetchHospitalById(consentDto.getDataCustodianId());
+                //consentUIDto.setHospital_name(hospitalDto.getHospital_name());
                 DoctorDto doctorDto=fetchDoctorById(consentDto.getDoctor_id());
                 consentUIDto.setDoctor_name(doctorDto.getDoctor_name());
                 consentUIDtoList.add(consentUIDto);

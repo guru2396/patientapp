@@ -11,11 +11,11 @@ public class CreateConsent {
 
     private String doctor_id;
 
-    private String dataCustodianId;
+    //private String dataCustodianId;
 
     private String ehr_id;
 
-    private List<EpisodeDetails> episodes;
+    private List<DataCustodian> dataCustodians;
 
     private String purpose;
 
