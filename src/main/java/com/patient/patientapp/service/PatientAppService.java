@@ -127,6 +127,7 @@ public class PatientAppService {
     }
 
     public List<ConsentNotificationResponse> getConsentRequests(String patientId){
+        System.out.println(patientId);
         String url=centraldbServerUrl + "/get-consent-notifications" + "/" + patientId;
         RestTemplate restTemplate=new RestTemplate();
         String token=getCentralServerToken();
