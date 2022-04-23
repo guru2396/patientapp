@@ -1,6 +1,7 @@
 package com.patient.patientapp.service;
 
 import com.patient.patientapp.dto.AddNomineeDto;
+import com.patient.patientapp.dto.AddNomineeResponseDto;
 import com.patient.patientapp.dto.AuthRequest;
 import com.patient.patientapp.entity.Nominee_info;
 import com.patient.patientapp.repository.Add_Nominee_repo;
@@ -16,7 +17,7 @@ public class NomineeService {
     @Autowired
     private JwtService jwtService;
 
-    public String addNominee(AddNomineeDto addNomineeDto, String patientId){
+    public AddNomineeResponseDto addNominee(AddNomineeDto addNomineeDto, String patientId){
         Nominee_info nominee=add_nominee_repo.getNomineeByEmail(addNomineeDto.getNominee_email());
         if(nominee==null){
             Nominee_info nominee_info = new Nominee_info();
@@ -24,14 +25,17 @@ public class NomineeService {
             nominee_info.setNominee_email(addNomineeDto.getNominee_email());
             nominee_info.setNominee_contact(addNomineeDto.getNominee_contact());
             nominee_info.setPatient_id((patientId));
-            nominee_info.setNominee_code((String.valueOf(generateID())));
+            String code=String.valueOf(generateID());
+            nominee_info.setNominee_code(code);
             nominee_info.setIs_deleted("N");
             long id=generateID();
             String nomineeId="NOM_"+id;
             nominee_info.setNominee_id(nomineeId);
             add_nominee_repo.save(nominee_info);
-
-            return "Nominee added successfully";
+            AddNomineeResponseDto addNomineeResponseDto=new AddNomineeResponseDto();
+            addNomineeResponseDto.setNominee_id(nomineeId);
+            addNomineeResponseDto.setNominee_code(code);
+            return addNomineeResponseDto;
         }
         else{
             return null;

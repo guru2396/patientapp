@@ -120,8 +120,8 @@ public class PatientAppController {
     @PostMapping(value ="/add-nominee")
     public ResponseEntity<?> addNominee(@RequestBody AddNomineeDto addNomineeDto,@RequestHeader("Authorization") String token){
         String patientId=jwtService.extractID(token);
-        String status=nomineeService.addNominee(addNomineeDto,patientId);
-        return ResponseEntity.ok(status);
+        AddNomineeResponseDto addNomineeResponseDto=nomineeService.addNominee(addNomineeDto,patientId);
+        return ResponseEntity.ok(addNomineeResponseDto);
     }
 
     @PostMapping(value = "/login-nominee")
