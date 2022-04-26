@@ -485,10 +485,19 @@ public class PatientAppService {
                 consentUIDto.setDelegate_access(consentDto.getDelegate_access());
                 consentUIDto.setCreation_date(consentDto.getCreation_date());
                 consentUIDto.setValidity(consentDto.getValidity());
+                List<DataCustodian> dataCustodians=new ArrayList<>();
+                for(DataCustodian dataCustodian:consentDto.getDataCustodianList()){
+                    DataCustodian custodian=new DataCustodian();
+                    custodian.setEpisodes(dataCustodian.getEpisodes());
+                    String hospitalName=fetchHospitalById(dataCustodian.getDataCustodianId()).getHospital_name();
+                    dataCustodian.setDataCustodianId(hospitalName);
+                    dataCustodians.add(dataCustodian);
+                }
                 //HospitalDto hospitalDto=fetchHospitalById(consentDto.getDataCustodianId());
                 //consentUIDto.setHospital_name(hospitalDto.getHospital_name());
                 DoctorDto doctorDto=fetchDoctorById(consentDto.getDoctor_id());
                 consentUIDto.setDoctor_name(doctorDto.getDoctor_name());
+                consentUIDto.setDataCustodians(dataCustodians);
                 consentUIDtoList.add(consentUIDto);
             }
         }

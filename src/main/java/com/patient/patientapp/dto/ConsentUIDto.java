@@ -2,6 +2,8 @@ package com.patient.patientapp.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ConsentUIDto {
 
@@ -18,4 +20,6 @@ public class ConsentUIDto {
     private String creation_date;
 
     private String validity;
+
+    private List<DataCustodian> dataCustodians;
 }
