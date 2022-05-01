@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class PatientAppService {
@@ -435,7 +432,7 @@ public class PatientAppService {
             });
             accessLogsDtoList.addAll(response.getBody());
         }
-
+        Collections.sort(accessLogsDtoList,Collections.reverseOrder());
         return accessLogsDtoList;
     }
 
