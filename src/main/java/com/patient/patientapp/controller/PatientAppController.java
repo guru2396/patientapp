@@ -97,6 +97,10 @@ public class PatientAppController {
     @PostMapping(value="/validate-otp/{patientId}/{otp}")
     public ResponseEntity<?> validateOtp(@PathVariable("patientId") String patientId,@PathVariable("otp") String otp){
         String status=patientAppService.validateOtp(patientId,otp);
+        if(status==null){
+            ResponseEntity<String> response=new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
+            return response;
+        }
         return ResponseEntity.ok(status);
     }
 
